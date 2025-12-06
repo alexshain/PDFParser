@@ -1,9 +1,23 @@
 #ifndef COMPONENT
 #define COMPONENT
 
+#include <iostream>
+#include <unordered_map>
+#include <vector>
+#include <tuple>
+#include <memory>
+
+using TableDataMap = std::unordered_map<std::string, std::vector<std::string>>;
+
 class Component {
+protected:
+    std::weak_ptr<Component> parent_;
+
 public:
-    virtual ~Component() {}
+    void setParent(std::shared_ptr<Component>&& parent);
+    std::shared_ptr<Component> getParent() const;
+    virtual bool isComposite() const = 0;
+    virtual ~Component() = default;
 };
 
 #endif

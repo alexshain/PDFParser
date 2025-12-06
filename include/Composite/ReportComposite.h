@@ -7,10 +7,14 @@
 
 class ReportComposite final : public Component {
 private:
+    std::string name;
     std::vector<std::unique_ptr<Component>> children;
 
 public:
     void add(std::unique_ptr<Component>&& component);
+    std::string getName() const;
+    const std::vector<std::unique_ptr<Component>>& getChildren() const;
+    bool isComposite() const override;
 };
 
 #endif
