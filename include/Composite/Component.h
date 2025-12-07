@@ -2,12 +2,9 @@
 #define COMPONENT
 
 #include <iostream>
-#include <unordered_map>
 #include <vector>
 #include <tuple>
 #include <memory>
-
-using TableDataMap = std::unordered_map<std::string, std::vector<std::string>>;
 
 class Component {
 protected:

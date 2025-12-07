@@ -1,3 +1,8 @@
+#include "AnsysReport/AnsysReport.h"
+#include "Composite/ReportComposite.h"
+#include "Composite/SettingsDataTable.h"
+#include "PDFParser.h"
+
 #include <iostream>
 #include <podofo/podofo.h>
 #include <vector>
@@ -43,15 +48,18 @@ int main() {
 
     readFile("Ansys_Fluent_Simulation_Report.pdf");
 
+    /*
+    std::string fluentFile1 = "";
+    std::string fluentFile2 = "";
+
+    PDFParser parser(fluentFile1);
+
+    std::unique_ptr<AnsysReport> aReport1 = parser.parse();
+
+    parser.reset(fluentFile2);
+
+    std::unique_ptr<AnsysReport> aReport2 = parser.parse();
+    */
+
     return 0;
 }
-
-//  Закончил реализацию древовидной логики, 
-//  Добвил флаг для выбора правильной логики в зависимости от того лист это или нет
-//  
-//  далее надо реализовать правильный парсинг и построения дерева компонентов
-//
-//
-//
-//
-//

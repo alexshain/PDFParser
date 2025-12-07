@@ -15,16 +15,18 @@ class PDFParser {
 private:
     std::string filename_;
     PdfMemDocument document_;
-    std::unique_ptr<AnsysReport> ansysReport;
 
 public: 
     explicit PDFParser(const std::string& filename);
-    void parse();
+    std::unique_ptr<AnsysReport> parse();
+    void reset(const std::string& filename);
 
 private:
-    void readFile();
+    void setDocument();
     void fillChapter(const std::vector<PoDoFo::PdfTextEntry>& entries);
-    bool isTitle();
+    
+private:
+    std::stack<ReportComposite> componentStack_;
 };
 
 #endif

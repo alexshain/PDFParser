@@ -8,11 +8,12 @@
 
 class AnsysReport {
 private:
-    std::vector<std::unique_ptr<ReportComposite>> tables;
+    std::vector<std::unique_ptr<Component>> tables;
 
 public:
-    void addTable(std::unique_ptr<ReportComposite>&& table);
-    const std::vector<std::unique_ptr<ReportComposite>>& getChapters() const;
+    void addTable(std::unique_ptr<Component>&& table);
+    const std::vector<std::unique_ptr<Component>>& getChapters() const;
+    void wtireToConsole() const;
 };
 
 #endif
