@@ -20,22 +20,34 @@ void readFile(const std::string& filename) {
         std::cout << "=== PDF Information ===" << std::endl;
         std::cout << "Pages: " << document.GetPages().GetCount() << std::endl;
         
-        PdfPage& page = document.GetPages().GetPageAt(0);
 
-        std::vector<PoDoFo::PdfTextEntry> entries;
+        std::vector<PoDoFo::PdfTextEntry> globalEntries;
+
+        for(int i = 0; i < document.GetPages().GetCount(); i++) {
+            std::vector<PoDoFo::PdfTextEntry> entries;
         
-        PdfTextExtractParams params;
-        params.Flags = PdfTextExtractFlags::TokenizeWords;
-        page.ExtractTextTo(entries, params);
+            PdfTextExtractParams params;
+            params.Flags = PdfTextExtractFlags::TokenizeWords;
+            PdfPage& page = document.GetPages().GetPageAt(i);
+            page.ExtractTextTo(entries, params);
 
-        std::sort(entries.begin(), entries.end(), 
-                [](PdfTextEntry& a, PdfTextEntry& b) {
-                    if(a.Y != b.Y)
-                        return a.Y > b.Y;
-                    return a.X < b.X;
-                });
+            int factor = document.GetPages().GetCount() - i;
+            for(auto& entry : entries) {
+                entry.Y += page.GetMediaBox().Height * factor;
+                globalEntries.push_back(entry);
+            }
+    
+            
+        }
 
-        for (const auto& entry : entries) {
+        std::sort(globalEntries.begin(), globalEntries.end(), 
+                    [](PdfTextEntry& a, PdfTextEntry& b) {
+                        if(a.Y != b.Y)
+                            return a.Y > b.Y;
+                        return a.X < b.X;
+                    });
+
+        for (const auto& entry : globalEntries) {
             std::cout << entry.Text << " (x, y) = " << "(" << entry.X << "," << entry.Y << ") " << "Length: " << entry.Length << std::endl;
         }
         
@@ -46,7 +58,7 @@ void readFile(const std::string& filename) {
 
 int main() {
 
-    readFile("Ansys_Fluent_Simulation_Report.pdf");
+    //readFile("Ansys_Fluent_Simulation_Report.pdf");
 
     /*
     std::string fluentFile1 = "";
@@ -60,6 +72,13 @@ int main() {
 
     std::unique_ptr<AnsysReport> aReport2 = parser.parse();
     */
+
+    std::string fluentFile1 = "Ansys_Fluent_Simulation_Report.pdf";
+
+    PDFParser parser(fluentFile1);
+
+    std::unique_ptr<AnsysReport> aReport1 = parser.parse();
+    aReport1->wtireToConsole();
 
     return 0;
 }

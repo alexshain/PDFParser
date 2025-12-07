@@ -8,8 +8,8 @@ void ParsingContext::setStrategy(std::unique_ptr<ParsingStrategy>&& strategy) {
     
 }
 
-std::shared_ptr<TableDataMap> ParsingContext::executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const {
-    std::shared_ptr<TableDataMap> dMap;
+TableDataMap ParsingContext::executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const {
+    TableDataMap dMap;
     strategy_->execute(line, entries, index, dMap);
     return dMap;
 }

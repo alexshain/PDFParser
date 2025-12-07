@@ -13,7 +13,10 @@ protected:
 public:
     void setParent(std::shared_ptr<Component>&& parent);
     std::shared_ptr<Component> getParent() const;
+    virtual std::string getName() const = 0;
+    virtual std::vector<Component*> getChildren() const = 0;
     virtual bool isComposite() const = 0;
+    virtual void write() const = 0;
     virtual ~Component() = default;
 };
 

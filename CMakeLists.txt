@@ -11,5 +11,15 @@ find_package(PoDoFo REQUIRED)
 message(STATUS "Found PoDoFo: ${PoDoFo_VERSION}")
 
 add_executable(pdf_parser 
-			src/main.cpp)
+			src/main.cpp
+			src/PDFParser.cpp
+			src/AnsysReport/AnsysReport.cpp
+			src/Composite/Component.cpp
+			src/Composite/ReportComposite.cpp
+			src/Composite/SettingsDataTable.cpp
+			src/ParsingStrategy/ParsingContext.cpp
+			src/ParsingStrategy/ParsingNestedTable.cpp
+			src/ParsingStrategy/ParsingOrdinaryTable.cpp
+			src/ParsingStrategy/ParsingStrategy.cpp)
+
 target_link_libraries(pdf_parser podofo::podofo)

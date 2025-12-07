@@ -8,13 +8,14 @@
 class ReportComposite final : public Component {
 private:
     std::string name_;
-    std::vector<std::shared_ptr<Component>> children_;
+    std::vector<Component*> children_;
 
 public:
     ReportComposite(const std::string& name);
-    void add(std::shared_ptr<Component> component);
-    std::string getName() const;
-    const std::vector<std::shared_ptr<Component>>& getChildren() const;
+    void add(Component& component);
+    std::string getName() const override;
+    std::vector<Component*> getChildren() const override;
+    void write() const override;
     bool isComposite() const override;
 };
 

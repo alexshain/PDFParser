@@ -12,6 +12,21 @@ const TableDataMap& SettingsDataTable::getRows() const {
     return rows_;
 }
 
+void SettingsDataTable::write() const {
+    std::cout << name_ << "\n\t";
+    for (const auto& pair : rows_) {
+        std::cout << "Key: " << pair.first << " Values: ";
+        for (const auto& value : pair.second) {
+            std::cout << value << " ";
+        }
+        std::cout << "\n";
+    }
+}
+
+std::vector<Component*> SettingsDataTable::getChildren() const {
+    return {};
+}
+
 bool SettingsDataTable::isComposite() const {
     return false;
 }

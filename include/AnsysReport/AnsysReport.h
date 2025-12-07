@@ -1,18 +1,18 @@
 #ifndef ANSYS_REPORT
 #define ANSYS_REPORT
 
-#include "ReportComposite.h"
+#include "Composite/ReportComposite.h"
 
 #include <memory>
 #include <vector>
 
 class AnsysReport {
 private:
-    std::vector<std::unique_ptr<Component>> tables;
+    std::vector<ReportComposite> tables;
 
 public:
-    void addTable(std::unique_ptr<Component>&& table);
-    const std::vector<std::unique_ptr<Component>>& getChapters() const;
+    void addTable(ReportComposite table);
+    const std::vector<ReportComposite>& getChapters() const;
     void wtireToConsole() const;
 };
 

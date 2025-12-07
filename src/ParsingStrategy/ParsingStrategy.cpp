@@ -2,7 +2,7 @@
 
 
 bool ParsingStrategy::checkComponentOfSentence(const PdfTextEntry& prevEntry, const PdfTextEntry& currEntry) {
-    double maxSpaceLength = (prevEntry.Length / prevEntry.Text.size()) * 7; //эмпирический подбор
+    double maxSpaceLength = (prevEntry.Length / prevEntry.Text.size()) * 12; //эмпирический подбор
     double spaceLength = currEntry.X - prevEntry.X - prevEntry.Length;
     return spaceLength < maxSpaceLength;
 }
@@ -13,6 +13,7 @@ void ParsingStrategy::setSentence(std::string& line, const std::vector<PdfTextEn
         line.append(entries[index].Text + " ");
         index++;
     }
+
 }
 
 void ParsingStrategy::setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index) {
@@ -21,5 +22,6 @@ void ParsingStrategy::setMapValue(std::vector<std::string>& value, const std::ve
     do {
         setSentence(str, entries, index);
         value.push_back(str);
+        index++;
     } while(!(entries[index + 1].Y < currentY));
 }
