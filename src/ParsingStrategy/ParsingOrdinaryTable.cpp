@@ -2,7 +2,7 @@
 #include "Composite/SettingsDataTable.h"
 #include "Composite/ReportComposite.h"
 
-void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& rows) const {
+void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& rows, double xCoordOfFirstWord) const {
     std::string key;
     std::vector<std::string> value;
 
@@ -11,13 +11,17 @@ void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextE
         ParsingStrategy::setMapValue(value, entries, index);
         rows.insert({key, value});
 
-        index++;
         value.clear();
-        setSentence(line, entries, index);
-
-        if(entries[index].Y < entries[index - 1].Y) { 
+        
+        double eps = 0.01;
+        if(entries[index].X + eps < xCoordOfFirstWord && entries[index].Y < entries[index - 1].Y) { 
+            line = entries[index].Text;
+            index--;
             break;
         }
+        
+        xCoordOfFirstWord = entries[index].X;
+        setSentence(line, entries, index);
     }
     
 } 

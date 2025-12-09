@@ -10,7 +10,6 @@ const std::vector<ReportComposite>& AnsysReport::getChapters() const {
 
 void AnsysReport::wtireToConsole() const {
     for(const auto& table: tables) {
-        std::cout << "before table.write();" << std::endl;
         table.write();
     }
 }

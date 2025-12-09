@@ -56,49 +56,66 @@ void PDFParser::setDocument() {
     }
 }
 
-// не забыть добавить парсинг с нескольких страниц
 void PDFParser::fillReport(const std::vector<PdfTextEntry>& entries) {
     ParsingContext pContext;
     std::string line = entries[0].Text;
     std::string potentialTitle;
-    double flag = 0;
+    double xCoordOfFirstWord = entries[0].X;
     for (int i = 1; i < entries.size(); i++) {
-        std::cout << line << std::endl;
         if(entries[i].Y < entries[i - 1].Y) {
+            xCoordOfFirstWord = entries[i].X;
             if(entries[i].Text == "") {
-                flag = entries[i].X;
+                std::stack<ReportComposite> nestedComponentStack;
+                std::stack<double> flags;
+                ReportComposite rComposite(line);
+                nestedComponentStack.push(rComposite);
+                flags.push(entries[i].X);
+
                 std::unique_ptr<ParsingNestedTable> nt = std::make_unique<ParsingNestedTable>();
                 pContext.setStrategy(std::move(nt));
+
+
                 while(true && i < entries.size()) {
-                    ReportComposite rComposite(line);
-                    componentStack_.push(rComposite);
+                    i++;
+                    ParsingStrategy::setSentence(line, entries, i);
+                    rComposite = ReportComposite(line);
+                    nestedComponentStack.top().add(std::make_shared<ReportComposite>(rComposite));
+                    nestedComponentStack.push(rComposite);
 
                     while(entries[i].Text == "") {
-                        if(i < entries.size() - 1) { 
-                            i++;
-                        } else break;
-                        flag = entries[i].X;
+                        flags.push(entries[i].X);
+                        i++;
                         ParsingStrategy::setSentence(line, entries, i);
                         rComposite = ReportComposite(line);
-                        componentStack_.push(rComposite);
+                        nestedComponentStack.top().add(std::make_shared<ReportComposite>(rComposite));
+                        nestedComponentStack.push(rComposite);
                     }
                     
                     //отрефакторить
                     std::string tableName = "";
-                    if(!componentStack_.empty()) tableName = componentStack_.top().getName() + " table";
-                    TableDataMap c = pContext.executeParsingStrategy(line, entries, i);
-                    std::shared_ptr<SettingsDataTable> dTable = std::make_shared<SettingsDataTable>(tableName, c);
-                    if(!componentStack_.empty()) componentStack_.top().add(rComposite);
-                    if(!componentStack_.empty()) componentStack_.pop();
+
+                    if(!nestedComponentStack.empty()) {
+                        tableName = nestedComponentStack.top().getName() + " table";
+                        TableDataMap c = pContext.executeParsingStrategy(line, entries, i, xCoordOfFirstWord);
+                        std::shared_ptr<SettingsDataTable> dTable = std::make_shared<SettingsDataTable>(tableName, c);
+                        nestedComponentStack.top().add(std::make_shared<ReportComposite>(rComposite));
+                        nestedComponentStack.pop();
+                    }
+
+                    if(entries[i].X > flags.top()) {
+                        i++;
+                        ParsingStrategy::setSentence(line, entries, i);
+                        rComposite = ReportComposite(line);
+                        nestedComponentStack.top().add(std::make_shared<ReportComposite>(rComposite));
+                        nestedComponentStack.push(rComposite);
+                    }
                     
-                    //i++;
                     if(entries[i].Text == "" && flag == entries[i].X) {
-                        //отрефакторить
                         std::string tableName = "";
                         if(!componentStack_.empty()) tableName = componentStack_.top().getName() + " table";
-                        TableDataMap c = pContext.executeParsingStrategy(line, entries, i);
+                        TableDataMap c = pContext.executeParsingStrategy(line, entries, i, xCoordOfFirstWord);
                         dTable = std::make_shared<SettingsDataTable>(tableName, c);
-                        if(!componentStack_.empty()) componentStack_.top().add(rComposite);
+                        if(!componentStack_.empty()) componentStack_.top().add(std::make_shared<ReportComposite>(rComposite));
                         if(!componentStack_.empty()) componentStack_.pop();
                     } else if(entries[i].Text == "" && flag > entries[i].X) {
                         if(!componentStack_.empty()) componentStack_.pop();
@@ -115,9 +132,9 @@ void PDFParser::fillReport(const std::vector<PdfTextEntry>& entries) {
                         }
                         std::string tableName = "";
                         if(!componentStack_.empty()) tableName = componentStack_.top().getName() + " table";
-                        TableDataMap c = pContext.executeParsingStrategy(line, entries, i);
+                        TableDataMap c = pContext.executeParsingStrategy(line, entries, i, xCoordOfFirstWord);
                         dTable = std::make_shared<SettingsDataTable>(tableName, c);
-                        if(!componentStack_.empty()) componentStack_.top().add(rComposite);
+                        if(!componentStack_.empty()) componentStack_.top().add(std::make_shared<ReportComposite>(rComposite));
                         if(!componentStack_.empty()) componentStack_.pop();
                     } else if(entries[i].Text != "") {
                         line = entries[i].Text;
@@ -135,29 +152,26 @@ void PDFParser::fillReport(const std::vector<PdfTextEntry>& entries) {
             }
         } else {
             if(ParsingStrategy::checkComponentOfSentence(entries[i - 1], entries[i])) {
-                //std::cout << i << std::endl;
-                
                 line.append(" " + entries[i].Text);
-                //std::cout << line << std::endl;
             } else {
+                //тут можно убрать стэк
+                std::stack<ReportComposite> ordinaryComponentStack;
                 std::unique_ptr<ParsingOrdinaryTable> ot = std::make_unique<ParsingOrdinaryTable>();
                 pContext.setStrategy(std::move(ot));
 
                 ReportComposite rComposite(potentialTitle);
-                componentStack_.push(rComposite);
+                ordinaryComponentStack.push(rComposite);
 
-                //отрефактоорить
                 std::string tableName = "";
-                if(!componentStack_.empty()) tableName = componentStack_.top().getName() + " table";
-
-                TableDataMap c = pContext.executeParsingStrategy(line, entries, i);
-
-                SettingsDataTable table(tableName, c);
-                if(!componentStack_.empty()) componentStack_.top().add(table);
-
-                if(!componentStack_.empty()) aReport_->addTable(componentStack_.top());
-
-                if(!componentStack_.empty()) componentStack_.pop();
+                if(!ordinaryComponentStack.empty()) {
+                    tableName = ordinaryComponentStack.top().getName() + " table";
+                    TableDataMap c = pContext.executeParsingStrategy(line, entries, i, xCoordOfFirstWord);
+                    SettingsDataTable table(tableName, c);
+                    ordinaryComponentStack.top().add(std::make_shared<SettingsDataTable>(table));
+                    aReport_->addTable(ordinaryComponentStack.top());
+                    ordinaryComponentStack.pop();
+                }
+                //i--;
             }
         }
     }

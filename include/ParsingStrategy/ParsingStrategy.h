@@ -10,7 +10,7 @@ using PoDoFo::PdfTextEntry;
 class ParsingStrategy {
 public:
     virtual ~ParsingStrategy() = default;
-    virtual void execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& dMap) const = 0;
+    virtual void execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& dMap, double xCoordOfFirstWord) const = 0;
 
 public:
     friend class PDFParser;

@@ -23,7 +23,7 @@ void SettingsDataTable::write() const {
     }
 }
 
-std::vector<Component*> SettingsDataTable::getChildren() const {
+std::vector<std::shared_ptr<Component>> SettingsDataTable::getChildren() const {
     return {};
 }
 

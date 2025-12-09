@@ -75,10 +75,17 @@ int main() {
 
     std::string fluentFile1 = "Ansys_Fluent_Simulation_Report.pdf";
 
-    PDFParser parser(fluentFile1);
+    std::unique_ptr<AnsysReport> aReport1;
 
-    std::unique_ptr<AnsysReport> aReport1 = parser.parse();
+    PDFParser parser(fluentFile1);
+    aReport1 = parser.parse();
+
     aReport1->wtireToConsole();
 
     return 0;
 }
+
+
+//надо отладить работу pdf парсера, отрефакторить все, правильно организовать работу указателей и тд, 
+//решить что делать с пробросами аргументов (мне кажется это говнокод)
+//и все, можно переходить к написанию сравнения и визуализации отличий

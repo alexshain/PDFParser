@@ -26,7 +26,6 @@ private:
     void fillReport(const std::vector<PoDoFo::PdfTextEntry>& entries);
     
 private:
-    std::stack<ReportComposite> componentStack_;
     std::unique_ptr<AnsysReport> aReport_;
 };
 

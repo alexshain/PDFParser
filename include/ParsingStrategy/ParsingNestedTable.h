@@ -6,7 +6,7 @@
 class ParsingNestedTable : public ParsingStrategy 
 {
 public:
-    void execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& dMap) const override;
+    void execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& dMap, double xCoordOfFirstWord) const override;
 };
 
 #endif

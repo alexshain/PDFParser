@@ -6,7 +6,7 @@ std::string ReportComposite::getName() const {
     return name_;
 }
 
-std::vector<Component*> ReportComposite::getChildren() const {
+std::vector<std::shared_ptr<Component>> ReportComposite::getChildren() const {
     return children_;
 }
 
@@ -17,8 +17,8 @@ void ReportComposite::write() const {
     }
 }
 
-void ReportComposite::add(Component& component) {
-    children_.push_back(&component);
+void ReportComposite::add(std::shared_ptr<Component> component) {
+    children_.push_back(component);
 }
 
 bool ReportComposite::isComposite() const {

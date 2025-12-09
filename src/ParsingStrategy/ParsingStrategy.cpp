@@ -8,20 +8,19 @@ bool ParsingStrategy::checkComponentOfSentence(const PdfTextEntry& prevEntry, co
 }
 
 void ParsingStrategy::setSentence(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) {
-    line = "";
+    line = entries[index].Text;
+    index++;
     while(checkComponentOfSentence(entries[index - 1], entries[index]) && entries[index - 1].Y == entries[index].Y) {
-        line.append(entries[index].Text + " ");
+        line.append(" " + entries[index].Text);
         index++;
     }
 
 }
 
 void ParsingStrategy::setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index) {
-    std::string str;
-    double currentY = entries[index].Y;
+    std::string str = "";
     do {
         setSentence(str, entries, index);
         value.push_back(str);
-        index++;
-    } while(!(entries[index + 1].Y < currentY));
+    } while(!(entries[index].Y < entries[index - 1].Y));
 }
