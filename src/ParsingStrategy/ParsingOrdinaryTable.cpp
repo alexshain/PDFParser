@@ -2,9 +2,10 @@
 #include "Composite/SettingsDataTable.h"
 #include "Composite/ReportComposite.h"
 
-void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& rows, double xCoordOfFirstWord) const {
+void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& rows) const {
     std::string key;
     std::vector<std::string> value;
+    double xCoordOfFirstWord = 0;
 
     while (true) {
         key = std::move(line);
@@ -16,7 +17,7 @@ void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextE
         double eps = 0.01;
         if(entries[index].X + eps < xCoordOfFirstWord && entries[index].Y < entries[index - 1].Y) { 
             line = entries[index].Text;
-            index--;
+            //index--;
             break;
         }
         

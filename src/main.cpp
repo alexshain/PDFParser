@@ -81,6 +81,7 @@ int main() {
     aReport1 = parser.parse();
 
     aReport1->wtireToConsole();
+    
 
     return 0;
 }

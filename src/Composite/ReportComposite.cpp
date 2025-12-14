@@ -13,7 +13,11 @@ std::vector<std::shared_ptr<Component>> ReportComposite::getChildren() const {
 void ReportComposite::write() const {
     std::cout << name_ << "\n\t";
     for (const auto& component : children_)  {
+        if(component == nullptr) {
+            continue;
+        }
         component->write();
+        std::cout << "\n";
     }
 }
 

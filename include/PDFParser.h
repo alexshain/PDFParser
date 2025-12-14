@@ -8,6 +8,7 @@
 #include <memory>
 
 #include "AnsysReport/AnsysReport.h"
+#include "ParsingStrategy/ParsingContext.h"
 
 using namespace PoDoFo;
 
@@ -24,8 +25,11 @@ public:
 private:
     void setDocument();
     void fillReport(const std::vector<PoDoFo::PdfTextEntry>& entries);
+    void algorithm(std::stack<std::shared_ptr<ReportComposite>>& nestedComponentStack, 
+        std::stack<double>& flags, std::string& line, const std::vector<PdfTextEntry>& entries, int& index);
     
 private:
+    ParsingContext pContext_;
     std::unique_ptr<AnsysReport> aReport_;
 };
 

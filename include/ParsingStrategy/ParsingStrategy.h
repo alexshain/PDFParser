@@ -10,15 +10,15 @@ using PoDoFo::PdfTextEntry;
 class ParsingStrategy {
 public:
     virtual ~ParsingStrategy() = default;
-    virtual void execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& dMap, double xCoordOfFirstWord) const = 0;
+    virtual void execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& dMap) const = 0;
 
 public:
     friend class PDFParser;
 
 protected:
-    static bool checkComponentOfSentence(const PdfTextEntry& prevEntry, const PdfTextEntry& currEntry);
-    static void setSentence(std::string& line, const std::vector<PdfTextEntry>& entries, int& index);
-    static void setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index);
+    bool checkComponentOfSentence(const PdfTextEntry& prevEntry, const PdfTextEntry& currEntry);
+    void setSentence(std::string& line, const std::vector<PdfTextEntry>& entries, int& index);
+    void setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index);
 };
 
 #endif

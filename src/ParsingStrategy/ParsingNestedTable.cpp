@@ -1,9 +1,10 @@
 #include "ParsingStrategy/ParsingNestedTable.h"
 #include "Composite/SettingsDataTable.h"
 
-void ParsingNestedTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& rows, double xCoordOfFirstWord) const {
-    std::string key;
+void ParsingNestedTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, TableDataMap& rows) const {
+    /*std::string key;
     std::vector<std::string> value;
+    double xCoordOfFirstWord = 0;
     
     while (true) {
         key = std::move(line);
@@ -25,5 +26,5 @@ void ParsingNestedTable::execute(std::string& line, const std::vector<PdfTextEnt
         
         xCoordOfFirstWord = entries[index].X;
         setSentence(line, entries, index);
-    }
+    }*/
 }

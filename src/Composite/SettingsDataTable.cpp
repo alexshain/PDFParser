@@ -17,7 +17,7 @@ void SettingsDataTable::write() const {
     for (const auto& pair : rows_) {
         std::cout << "Key: " << pair.first << " Values: ";
         for (const auto& value : pair.second) {
-            std::cout << value << " ";
+            std::cout << value << ", ";
         }
         std::cout << "\n";
     }

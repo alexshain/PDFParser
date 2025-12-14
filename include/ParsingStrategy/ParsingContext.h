@@ -13,7 +13,7 @@ class ParsingContext
 public:
     void setStrategy(std::unique_ptr<ParsingStrategy>&& strategy);
 
-    TableDataMap executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, double xCoordOfFirstWord) const;
+    TableDataMap executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const;
 };
 
 #endif
