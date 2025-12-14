@@ -75,7 +75,7 @@ int main() {
 
     std::string fluentFile1 = "Ansys_Fluent_Simulation_Report.pdf";
 
-    std::unique_ptr<AnsysReport> aReport1;
+    std::shared_ptr<AnsysReport> aReport1;
 
     PDFParser parser(fluentFile1);
     aReport1 = parser.parse();

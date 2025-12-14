@@ -8,8 +8,6 @@ void ParsingContext::setStrategy(std::unique_ptr<ParsingStrategy>&& strategy) {
     
 }
 
-TableDataMap ParsingContext::executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const {
-    TableDataMap dMap;
-    strategy_->execute(line, entries, index, dMap);
-    return dMap;
+void ParsingContext::executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, std::shared_ptr<AnsysReport> aReport) const {
+    strategy_->execute(line, entries, index, aReport);
 }

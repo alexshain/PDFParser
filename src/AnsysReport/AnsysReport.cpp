@@ -4,7 +4,7 @@ void AnsysReport::addTable(ReportComposite chapter) {
     tables.push_back(chapter);
 }
 
-const std::vector<ReportComposite>& AnsysReport::getChapters() const {
+std::vector<ReportComposite>& AnsysReport::getTables() {
     return tables;
 }
 

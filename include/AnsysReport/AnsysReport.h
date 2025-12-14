@@ -12,7 +12,7 @@ private:
 
 public:
     void addTable(ReportComposite table);
-    const std::vector<ReportComposite>& getChapters() const;
+    std::vector<ReportComposite>& getTables();
     void wtireToConsole() const;
 };
 

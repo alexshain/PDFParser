@@ -19,18 +19,16 @@ private:
 
 public: 
     explicit PDFParser(const std::string& filename);
-    std::unique_ptr<AnsysReport> parse();
+    std::shared_ptr<AnsysReport> parse();
     void reset(const std::string& filename);
 
 private:
     void setDocument();
     void fillReport(const std::vector<PoDoFo::PdfTextEntry>& entries);
-    void algorithm(std::stack<std::shared_ptr<ReportComposite>>& nestedComponentStack, 
-        std::stack<double>& flags, std::string& line, const std::vector<PdfTextEntry>& entries, int& index);
     
 private:
     ParsingContext pContext_;
-    std::unique_ptr<AnsysReport> aReport_;
+    std::shared_ptr<AnsysReport> aReport_;
 };
 
 #endif

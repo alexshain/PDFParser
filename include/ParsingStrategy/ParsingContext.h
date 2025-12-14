@@ -3,6 +3,7 @@
 
 #include "ParsingStrategy.h"
 #include "Composite/ReportComposite.h"
+#include "AnsysReport/AnsysReport.h"
 
 #include <memory>
 
@@ -13,7 +14,7 @@ class ParsingContext
 public:
     void setStrategy(std::unique_ptr<ParsingStrategy>&& strategy);
 
-    TableDataMap executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const;
+    void executeParsingStrategy(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, std::shared_ptr<AnsysReport> aReport) const;
 };
 
 #endif
