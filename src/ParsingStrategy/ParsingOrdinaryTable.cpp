@@ -4,7 +4,7 @@
 
 void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, std::shared_ptr<AnsysReport> aReport) const {
     std::string tableName = "";
-    tableName = aReport->getTables().back().getName() + " table"; //ordinaryComponentStack.top().getName() + " table";
+    tableName = aReport->getTables().back().getName() + " table";
     
     std::string key;
     std::vector<std::string> value;
@@ -38,43 +38,37 @@ bool ParsingOrdinaryTable::checkComponentOfSentence(const PdfTextEntry& prevEntr
     return spaceLength < maxSpaceLength;
 }
 
-void ParsingOrdinaryTable::setSentence(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const {
-    line = entries[index].Text;
-    index++;
-    while(checkComponentOfSentence(entries[index - 1], entries[index]) && entries[index - 1].Y == entries[index].Y) {
-        line.append(" " + entries[index].Text);
+void ParsingOrdinaryTable::setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index) const {
+    str_ = "";
+    y_min_ = entries[index].Y;
+
+    do {
+        firstEntry_ = entries[index];
+        int tempInd = index;
+        setSentence(str_, entries, index);
+
+        setElementOfMapValue(tempInd, entries);
+
+        value.push_back(str_);
+    } while(!(entries[index].Y < entries[index - 1].Y)); 
+
+    while(entries[index].Y >= y_min_) {  
         index++;
     }
 }
 
-void ParsingOrdinaryTable::setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index) const {
-    std::string str = "";
-    PdfTextEntry firstEntry;
-    double y_min = entries[index].Y;
-
-    do {
-        firstEntry = entries[index];
-        int tempInd = index;
-        setSentence(str, entries, index);
-
-        for(int i = tempInd; i < entries.size(); ++i) {
-            if(entries[i].Y < y_min && entries[i].X < firstEntry.X) {
-                break;
-            } else if(entries[i].Y < firstEntry.Y && firstEntry.X == entries[i].X) {
-                if(entries[i].Y < y_min)
-                    y_min = entries[i].Y;
-                firstEntry = entries[i];
-                std::string tempLine = "";
-                setSentence(tempLine, entries, i);
-                str.append(" " + tempLine);
-                --i;
-            }
+void ParsingOrdinaryTable::setElementOfMapValue(int tempInd, const std::vector<PdfTextEntry>& entries) const {
+    for(int i = tempInd; i < entries.size(); ++i) {
+        if(entries[i].Y < y_min_ && entries[i].X < firstEntry_.X) {
+            break;
+        } else if(entries[i].Y < firstEntry_.Y && firstEntry_.X == entries[i].X) {
+            if(entries[i].Y < y_min_)
+                y_min_ = entries[i].Y;
+            firstEntry_ = entries[i];
+            std::string tempLine = "";
+            setSentence(tempLine, entries, i);
+            str_.append(" " + tempLine);
+            --i;
         }
-
-        value.push_back(str);
-    } while(!(entries[index].Y < entries[index - 1].Y)); 
-
-    while(entries[index].Y >= y_min) {  
-        index++;
     }
 }

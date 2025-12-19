@@ -13,8 +13,15 @@ public:
 
 private:
     bool checkComponentOfSentence(const PdfTextEntry& prevEntry, const PdfTextEntry& currEntry) const override;
-    void setSentence(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const override;
     void setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index) const override;
+
+private:
+    void setElementOfMapValue(int tempInd, const std::vector<PdfTextEntry>& entries) const;
+
+private:
+    mutable std::string str_;
+    mutable PdfTextEntry firstEntry_;
+    mutable double y_min_;
 };
 
 #endif

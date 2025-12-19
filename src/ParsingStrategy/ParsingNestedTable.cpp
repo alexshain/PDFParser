@@ -17,7 +17,6 @@ void ParsingNestedTable::execute(std::string& line, const std::vector<PdfTextEnt
     aReport->addTable(*nestedComponentStack.top());
     nestedComponentStack.pop();
     index--;
-
 }
 
 void ParsingNestedTable::algorithm(std::stack<std::shared_ptr<ReportComposite>>& nestedComponentStack, 
@@ -51,12 +50,7 @@ void ParsingNestedTable::algorithm(std::stack<std::shared_ptr<ReportComposite>>&
 
             if(!flags.empty()) {
                 if(entries[index].X < flags.top() && entries[index].Text == "") {
-                    SettingsDataTable table(tableName, rows);
-                    if(!nestedComponentStack.empty()){
-                        nestedComponentStack.top()->add(std::make_shared<SettingsDataTable>(table));
-                        nestedComponentStack.pop();
-                    } 
-
+                    addComponentChild(tableName, rows, nestedComponentStack);
                     while(flags.top() > entries[index].X && !flags.empty() && !nestedComponentStack.empty()) {
                         flags.pop();
                     }
@@ -65,55 +59,49 @@ void ParsingNestedTable::algorithm(std::stack<std::shared_ptr<ReportComposite>>&
                 }
 
                 if(entries[index].X == flags.top() && entries[index].Text == "") {
-                    SettingsDataTable table(tableName, rows);
-                    if(!nestedComponentStack.empty()){
-                        nestedComponentStack.top()->add(std::make_shared<SettingsDataTable>(table));
-                        nestedComponentStack.pop();
-                    } 
+                    addComponentChild(tableName, rows, nestedComponentStack);
                     algorithm(nestedComponentStack, flags, line, entries, index);
                     break;
                 }
                 if(entries[index].X > flags.top() && entries[index].Text == "") {
                     algorithm(nestedComponentStack, flags, line, entries, index);
                 }
+
+                if(entries[index].X + eps < xCoordOfFirstWord && entries[index].X < flags.top()
+                    && entries[index].Y < entries[index - 1].Y && entries[index].Text != "") {
+                    addComponentChild(tableName, rows, nestedComponentStack);
+                    break;
+                }
+                if(entries[index].X + eps < xCoordOfFirstWord && entries[index].X > flags.top()
+                    && entries[index].Y < entries[index - 1].Y && entries[index].Text != "") {
+                    SettingsDataTable table(tableName, rows);
+                    if(!nestedComponentStack.empty() && !flags.empty()){
+                        nestedComponentStack.top()->add(std::make_shared<SettingsDataTable>(table));
+                        flags.pop();
+                    } 
+                    break;
+                }
             }
-            if(entries[index].X + eps < xCoordOfFirstWord /**/ && entries[index].X < flags.top() /**/
-                && entries[index].Y < entries[index - 1].Y && entries[index].Text != "") {
-                SettingsDataTable table(tableName, rows);
-                if(!nestedComponentStack.empty()){
-                    nestedComponentStack.top()->add(std::make_shared<SettingsDataTable>(table));
-                    nestedComponentStack.pop();
-                } 
-                break;
-            }
-            if(entries[index].X + eps < xCoordOfFirstWord && entries[index].X > flags.top()
-                && entries[index].Y < entries[index - 1].Y && entries[index].Text != "") {
-                SettingsDataTable table(tableName, rows);
-                if(!nestedComponentStack.empty() && !flags.empty()){
-                    nestedComponentStack.top()->add(std::make_shared<SettingsDataTable>(table));
-                    flags.pop();
-                } 
-                break;
-            }
+            
             xCoordOfFirstWord = entries[index].X;
             setSentence(line, entries, index);
         }
     }
 }
 
+void ParsingNestedTable::addComponentChild(const std::string tableName, const TableDataMap& rows
+    , std::stack<std::shared_ptr<ReportComposite>>& nestedComponentStack) const {
+    SettingsDataTable table(tableName, rows);
+    if(!nestedComponentStack.empty()){
+        nestedComponentStack.top()->add(std::make_shared<SettingsDataTable>(table));
+        nestedComponentStack.pop();
+    } 
+}
+
 bool ParsingNestedTable::checkComponentOfSentence(const PdfTextEntry& prevEntry, const PdfTextEntry& currEntry) const {
     double maxSpaceLength = (currEntry.Length / currEntry.Text.size()) * 18; 
     double spaceLength = currEntry.X - prevEntry.X - prevEntry.Length;
     return spaceLength < maxSpaceLength;
-}
-
-void ParsingNestedTable::setSentence(std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const {
-    line = entries[index].Text;
-    index++;
-    while(checkComponentOfSentence(entries[index - 1], entries[index]) && entries[index - 1].Y == entries[index].Y) {
-        line.append(" " + entries[index].Text);
-        index++;
-    }
 }
 
 void ParsingNestedTable::setMapValue(std::vector<std::string>& value, const std::vector<PdfTextEntry>& entries, int& index) const {
