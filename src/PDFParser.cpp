@@ -62,7 +62,7 @@ void PDFParser::fillReport(const std::vector<PdfTextEntry>& entries) {
     std::string potentialTitle = "";
     for (int i = 1; i < entries.size(); i++) {
         if(entries[i].Y < entries[i - 1].Y) {
-            if(entries[i].Text == "") {
+            if(entries[i].Text == "" && nestedTableNames.contains(line)) {
                 pContext_.setStrategy(std::make_unique<ParsingNestedTable>(nt));
                 pContext_.executeParsingStrategy(line, entries, i, aReport_);
             } else {
@@ -72,9 +72,9 @@ void PDFParser::fillReport(const std::vector<PdfTextEntry>& entries) {
         } else {
             if(ot.checkComponentOfSentence(entries[i - 1], entries[i])) {
                 line.append(" " + entries[i].Text);
-            } else {
+            } else if(ordinaryTableNames.contains(potentialTitle)) {
                 pContext_.setStrategy(std::make_unique<ParsingOrdinaryTable>(ot));
-                ReportComposite rComposite(potentialTitle);
+                std::shared_ptr<ReportComposite> rComposite = std::make_shared<ReportComposite>(potentialTitle);
                 aReport_->addTable(rComposite);
                 pContext_.executeParsingStrategy(line, entries, i, aReport_);
             }

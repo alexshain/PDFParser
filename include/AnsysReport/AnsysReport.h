@@ -8,11 +8,11 @@
 
 class AnsysReport {
 private:
-    std::vector<ReportComposite> tables;
+    std::vector<std::shared_ptr<ReportComposite>> tables;
 
 public:
-    void addTable(ReportComposite table);
-    std::vector<ReportComposite>& getTables();
+    void addTable(std::shared_ptr<ReportComposite> chapter);
+    std::vector<std::shared_ptr<ReportComposite>> getTables() const;
     void wtireToConsole() const;
 };
 

@@ -6,6 +6,7 @@
 #include <string>
 #include <sstream>
 #include <memory>
+#include <set>
 
 #include "AnsysReport/AnsysReport.h"
 #include "ParsingStrategy/ParsingContext.h"
@@ -16,6 +17,11 @@ class PDFParser {
 private:
     std::string filename_;
     PdfMemDocument document_;
+    const std::set<std::string> ordinaryTableNames = {"Models", "Reference Values", "Named Expressions"};
+    const std::set<std::string> nestedTableNames = {"Material Properties"
+                                                    , "Cell Zone Conditions"
+                                                    , "Boundary Conditions"
+                                                    , "Solver Settings"};
 
 public: 
     explicit PDFParser(const std::string& filename);

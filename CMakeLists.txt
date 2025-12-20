@@ -13,10 +13,14 @@ message(STATUS "Found PoDoFo: ${PoDoFo_VERSION}")
 add_executable(pdf_parser 
 			src/main.cpp
 			src/PDFParser.cpp
+			src/CompareFunctions.cpp
 			src/AnsysReport/AnsysReport.cpp
 			src/Composite/Component.cpp
 			src/Composite/ReportComposite.cpp
 			src/Composite/SettingsDataTable.cpp
+			src/Composite/ComponentDiffBase.cpp
+			src/Composite/CompositeComponentDiff.cpp
+			src/Composite/TableComponentDiff.cpp
 			src/ParsingStrategy/ParsingContext.cpp
 			src/ParsingStrategy/ParsingNestedTable.cpp
 			src/ParsingStrategy/ParsingOrdinaryTable.cpp
