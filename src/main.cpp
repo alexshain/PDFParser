@@ -12,93 +12,7 @@
 #include <algorithm>
 
 using namespace PoDoFo;
-
-void compareAllTables(const std::vector<std::shared_ptr<ReportComposite>>& tables1,
-    const std::vector<std::shared_ptr<ReportComposite>>& tables2) {
-
-    // Собираем все имена таблиц
-    std::map<std::string, std::pair<std::shared_ptr<ReportComposite>, 
-                                    std::shared_ptr<ReportComposite>>> tableMap;
-
-    // Добавляем таблицы из первого файла
-    for (const auto& table : tables1) {
-        tableMap[table->getName()].first = table;
-    }
-
-    // Добавляем таблицы из второго файла
-    for (const auto& table : tables2) {
-        tableMap[table->getName()].second = table;
-    }
-
-    // Сравниваем все таблицы
-    for (const auto& [tableName, tables] : tableMap) {
-        const auto& [table1, table2] = tables;
-
-        if (table1 && table2) {
-            // Таблица есть в обоих файлах - передаем ОРИГИНАЛЫ
-            std::cout << "\n=== Сравнение таблицы '" << tableName << "' ===\n";
-            if(tableName == "Boundary Conditions") {
-                compareAndPrint(table1, table2);  // ИЗМЕНИТЕ ЗДЕСЬ!
-                break;
-            }
-            
-        }
-        else if (table1) {
-            // Таблица есть только в первом файле
-            std::cout << "\n=== Таблица '" << tableName << "' есть только в ПЕРВОМ файле ===\n";
-        }
-        else if (table2) {
-            // Таблица есть только во втором файле
-            std::cout << "\n=== Таблица '" << tableName << "' есть только во ВТОРОМ файле ===\n";
-        }
-    }
-}
-
-void debugTableComparison(const std::vector<std::shared_ptr<ReportComposite>>& tables1,
-                         const std::vector<std::shared_ptr<ReportComposite>>& tables2) {
-    
-    std::cout << "\n=== ДИАГНОСТИКА ===\n";
-    std::cout << "Первый файл: " << tables1.size() << " таблиц\n";
-    std::cout << "Второй файл: " << tables2.size() << " таблиц\n\n";
-    
-    // Выводим все таблицы с их типами
-    std::cout << "Таблицы в первом файле:\n";
-    for (size_t i = 0; i < tables1.size(); ++i) {
-        const auto& table = tables1[i];
-        std::cout << "  [" << i << "] " << table->getName();
-        
-        // Проверяем, что внутри
-        auto children = table->getChildren();
-        std::cout << " (детей: " << children.size() << "): ";
-        
-        for (const auto& child : children) {
-            if (auto settingsTable = std::dynamic_pointer_cast<SettingsDataTable>(child)) {
-                std::cout << "SettingsDataTable[" << settingsTable->getRows().size() << " строк] ";
-            } else if (auto reportComp = std::dynamic_pointer_cast<ReportComposite>(child)) {
-                std::cout << "ReportComposite[" << reportComp->getName() << "] ";
-            }
-        }
-        std::cout << "\n";
-    }
-    
-    std::cout << "\nТаблицы во втором файле:\n";
-    for (size_t i = 0; i < tables2.size(); ++i) {
-        const auto& table = tables2[i];
-        std::cout << "  [" << i << "] " << table->getName();
-        
-        auto children = table->getChildren();
-        std::cout << " (детей: " << children.size() << "): ";
-        
-        for (const auto& child : children) {
-            if (auto settingsTable = std::dynamic_pointer_cast<SettingsDataTable>(child)) {
-                std::cout << "SettingsDataTable[" << settingsTable->getRows().size() << " строк] ";
-            } else if (auto reportComp = std::dynamic_pointer_cast<ReportComposite>(child)) {
-                std::cout << "ReportComposite[" << reportComp->getName() << "] ";
-            }
-        }
-        std::cout << "\n";
-    }
-}
+namespace fs = std::filesystem;
 
 int main() {
 
@@ -113,24 +27,78 @@ int main() {
 
     //std::cout << aReport1->getTables()[2]->getChildren().size() << "\n";
 
-    std::string fluentFile1 = "Ansys_Fluent_Simulation_Report_sort2.pdf";
-    std::string fluentFile2 = "Ansys_Fluent_Simulation_Report3.pdf";
+    std::cout << "=== Выбор двух PDF файлов ===\n" << std::endl;
+    
+    // Получаем список всех файлов в директории
+    std::vector<std::string> files;
+    for (const auto& entry : fs::directory_iterator(".")) {
+        if (entry.is_regular_file()) {
+            std::string ext = entry.path().extension().string();
+            // Проверяем расширение (без учета регистра)
+            if (ext.size() >= 4 && 
+                std::tolower(ext[ext.size()-4]) == '.' &&
+                std::tolower(ext[ext.size()-3]) == 'p' &&
+                std::tolower(ext[ext.size()-2]) == 'd' &&
+                std::tolower(ext[ext.size()-1]) == 'f') {
+                files.push_back(entry.path().filename().string());
+            }
+        }
+    }
+    
+    if (files.empty()) {
+        std::cout << "PDF файлы не найдены в текущей директории!" << std::endl;
+        return 1;
+    }
+    
+    // Выводим список файлов
+    std::cout << "Найдены следующие PDF файлы:\n";
+    for (size_t i = 0; i < files.size(); ++i) {
+        std::cout << "  " << i + 1 << ". " << files[i] << std::endl;
+    }
+    
+    // Выбор первого файла
+    std::string file1, file2;
+    int choice;
+    
+    std::cout << "\nВыберите номер первого файла: ";
+    std::cin >> choice;
+    
+    if (choice < 1 || choice > files.size()) {
+        std::cout << "Неверный выбор!" << std::endl;
+        return 1;
+    }
+    file1 = files[choice - 1];
+    
+    // Выбор второго файла (нельзя выбрать тот же самый)
+    std::cout << "\nВыберите номер второго файла (не " << file1 << "): ";
+    std::cin >> choice;
+    
+    if (choice < 1 || choice > files.size() || files[choice - 1] == file1) {
+        std::cout << "Неверный выбор!" << std::endl;
+        return 1;
+    }
+    file2 = files[choice - 1];
+    
+    std::cout << "\n✓ Выбраны файлы:\n";
+    std::cout << "  1. " << file1 << "\n";
+    std::cout << "  2. " << file2 << std::endl;
+
+
+
+    //std::string fluentFile1 = "Ansys_Fluent_Simulation_Report_sort2.pdf";
+    //std::string fluentFile2 = "Ansys_Fluent_Simulation_Report3.pdf";
 
     std::shared_ptr<AnsysReport> aReport1;
     std::shared_ptr<AnsysReport> aReport2;
 
-    PDFParser parser(fluentFile1);
+    PDFParser parser(file1);
     aReport1 = parser.parse();
 
-    PDFParser parser2(fluentFile2);
+    PDFParser parser2(file2);
     aReport2 = parser2.parse();
 
     std::vector<std::shared_ptr<ReportComposite>> tables1 = aReport1->getTables();
     std::vector<std::shared_ptr<ReportComposite>> tables2 = aReport2->getTables();
-    
-    //debugTableComparison(tables1, tables2);
-
-    //compareAllTables(tables1, tables2);
 
     for(int i = 0; i < tables1.size(); ++i) {
         for(int j = 0; j < tables2.size(); ++j) {
