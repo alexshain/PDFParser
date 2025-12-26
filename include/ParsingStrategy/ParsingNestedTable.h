@@ -17,7 +17,7 @@ private:
         , std::stack<double>& flags, std::string& line, const std::vector<PdfTextEntry>& entries, int& index) const;
 
     void addComponentChild(const std::string tableName, const TableDataMap& rows
-        , std::stack<std::shared_ptr<ReportComposite>>& nestedComponentStack) const;
+        , std::stack<std::shared_ptr<ReportComposite>>& nestedComponentStack, std::stack<double>& flags) const;
 };
 
 #endif

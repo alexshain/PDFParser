@@ -12,10 +12,10 @@ const TableDataMap& SettingsDataTable::getRows() const {
     return rows_;
 }
 
-void SettingsDataTable::write() const {
-    std::cout << name_ << "\n\t";
+void SettingsDataTable::write(std::string indent) const {
+    std::cout << indent << name_ << "\n";
     for (const auto& pair : rows_) {
-        std::cout << "Key: " << pair.first << " Values: ";
+        std::cout << indent << "Key: " << pair.first << " Values: ";
         for (const auto& value : pair.second) {
             std::cout << value << ", ";
         }
@@ -29,4 +29,16 @@ std::vector<std::shared_ptr<Component>> SettingsDataTable::getChildren() const {
 
 bool SettingsDataTable::isComposite() const {
     return false;
+}
+
+void SettingsDataTable::setParent(std::shared_ptr<Component> parent) {
+    parent_ = parent;
+}
+
+std::shared_ptr<Component> SettingsDataTable::getParent() const {
+    return parent_.lock();
+}
+
+std::string SettingsDataTable::getPath() const {
+    return parent_.lock()->getPath();
 }

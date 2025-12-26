@@ -2,6 +2,7 @@
 #include "Composite/ReportComposite.h"
 #include "Composite/SettingsDataTable.h"
 #include "PDFParser.h"
+#include "CompareFunctions.h"
 
 #include <iostream>
 #include <podofo/podofo.h>
@@ -11,82 +12,106 @@
 #include <algorithm>
 
 using namespace PoDoFo;
-
-void readFile(const std::string& filename) {
-    try {
-        PdfMemDocument document;
-        document.Load(filename);
-        
-        std::cout << "=== PDF Information ===" << std::endl;
-        std::cout << "Pages: " << document.GetPages().GetCount() << std::endl;
-        
-
-        std::vector<PoDoFo::PdfTextEntry> globalEntries;
-
-        for(int i = 0; i < document.GetPages().GetCount(); i++) {
-            std::vector<PoDoFo::PdfTextEntry> entries;
-        
-            PdfTextExtractParams params;
-            params.Flags = PdfTextExtractFlags::TokenizeWords;
-            PdfPage& page = document.GetPages().GetPageAt(i);
-            page.ExtractTextTo(entries, params);
-
-            int factor = document.GetPages().GetCount() - i;
-            for(auto& entry : entries) {
-                entry.Y += page.GetMediaBox().Height * factor;
-                globalEntries.push_back(entry);
-            }
-    
-            
-        }
-
-        std::sort(globalEntries.begin(), globalEntries.end(), 
-                    [](PdfTextEntry& a, PdfTextEntry& b) {
-                        if(a.Y != b.Y)
-                            return a.Y > b.Y;
-                        return a.X < b.X;
-                    });
-
-        for (const auto& entry : globalEntries) {
-            std::cout << entry.Text << " (x, y) = " << "(" << entry.X << "," << entry.Y << ") " << "Length: " << entry.Length << std::endl;
-        }
-        
-    } catch (PdfError& e) {
-        std::cerr << "Error reading PDF: " << e.what() << std::endl;
-    }
-}
+namespace fs = std::filesystem;
 
 int main() {
 
-    //readFile("Ansys_Fluent_Simulation_Report.pdf");
-
-    /*
-    std::string fluentFile1 = "";
-    std::string fluentFile2 = "";
-
-    PDFParser parser(fluentFile1);
-
-    std::unique_ptr<AnsysReport> aReport1 = parser.parse();
-
-    parser.reset(fluentFile2);
-
-    std::unique_ptr<AnsysReport> aReport2 = parser.parse();
-    */
-
-    std::string fluentFile1 = "Ansys_Fluent_Simulation_Report.pdf";
+    /*std::string fluentFile1 = "Ansys_Fluent_Simulation_Report_sort2.pdf";
 
     std::shared_ptr<AnsysReport> aReport1;
 
     PDFParser parser(fluentFile1);
     aReport1 = parser.parse();
 
-    aReport1->wtireToConsole();
+    aReport1->wtireToConsole();*/
+
+    //std::cout << aReport1->getTables()[2]->getChildren().size() << "\n";
+
+    std::cout << "=== Выбор двух PDF файлов ===\n" << std::endl;
     
+    // Получаем список всех файлов в директории
+    std::vector<std::string> files;
+    for (const auto& entry : fs::directory_iterator(".")) {
+        if (entry.is_regular_file()) {
+            std::string ext = entry.path().extension().string();
+            // Проверяем расширение (без учета регистра)
+            if (ext.size() >= 4 && 
+                std::tolower(ext[ext.size()-4]) == '.' &&
+                std::tolower(ext[ext.size()-3]) == 'p' &&
+                std::tolower(ext[ext.size()-2]) == 'd' &&
+                std::tolower(ext[ext.size()-1]) == 'f') {
+                files.push_back(entry.path().filename().string());
+            }
+        }
+    }
+    
+    if (files.empty()) {
+        std::cout << "PDF файлы не найдены в текущей директории!" << std::endl;
+        return 1;
+    }
+    
+    // Выводим список файлов
+    std::cout << "Найдены следующие PDF файлы:\n";
+    for (size_t i = 0; i < files.size(); ++i) {
+        std::cout << "  " << i + 1 << ". " << files[i] << std::endl;
+    }
+    
+    // Выбор первого файла
+    std::string file1, file2;
+    int choice;
+    
+    std::cout << "\nВыберите номер первого файла: ";
+    std::cin >> choice;
+    
+    if (choice < 1 || choice > files.size()) {
+        std::cout << "Неверный выбор!" << std::endl;
+        return 1;
+    }
+    file1 = files[choice - 1];
+    
+    // Выбор второго файла (нельзя выбрать тот же самый)
+    std::cout << "\nВыберите номер второго файла (не " << file1 << "): ";
+    std::cin >> choice;
+    
+    if (choice < 1 || choice > files.size() || files[choice - 1] == file1) {
+        std::cout << "Неверный выбор!" << std::endl;
+        return 1;
+    }
+    file2 = files[choice - 1];
+    
+    std::cout << "\n✓ Выбраны файлы:\n";
+    std::cout << "  1. " << file1 << "\n";
+    std::cout << "  2. " << file2 << std::endl;
+
+
+
+    //std::string fluentFile1 = "Ansys_Fluent_Simulation_Report_sort2.pdf";
+    //std::string fluentFile2 = "Ansys_Fluent_Simulation_Report3.pdf";
+
+    std::shared_ptr<AnsysReport> aReport1;
+    std::shared_ptr<AnsysReport> aReport2;
+
+    PDFParser parser(file1);
+    aReport1 = parser.parse();
+
+    PDFParser parser2(file2);
+    aReport2 = parser2.parse();
+
+    std::vector<std::shared_ptr<ReportComposite>> tables1 = aReport1->getTables();
+    std::vector<std::shared_ptr<ReportComposite>> tables2 = aReport2->getTables();
+
+    for(int i = 0; i < tables1.size(); ++i) {
+        for(int j = 0; j < tables2.size(); ++j) {
+            if(tables1[i]->getName() == tables2[j]->getName()) {
+                std::cout << "==== " << tables1[i]->getName() << " ======" << "\n";
+                compareAndPrint(tables1[i], tables2[j]);
+                break;
+            }
+        }
+    }
+
+
+
 
     return 0;
 }
-
-
-//надо отладить работу pdf парсера, отрефакторить все, правильно организовать работу указателей и тд, 
-//решить что делать с пробросами аргументов (мне кажется это говнокод)
-//и все, можно переходить к написанию сравнения и визуализации отличий

@@ -4,7 +4,7 @@
 
 void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextEntry>& entries, int& index, std::shared_ptr<AnsysReport> aReport) const {
     std::string tableName = "";
-    tableName = aReport->getTables().back().getName() + " table";
+    tableName = aReport->getTables().back()->getName() + " table";
     
     std::string key;
     std::vector<std::string> value;
@@ -29,11 +29,11 @@ void ParsingOrdinaryTable::execute(std::string& line, const std::vector<PdfTextE
     }
 
     SettingsDataTable table(tableName, rows);
-    aReport->getTables().back().add(std::make_shared<SettingsDataTable>(table));
+    aReport->getTables().back()->add(std::make_shared<SettingsDataTable>(table));
 } 
 
 bool ParsingOrdinaryTable::checkComponentOfSentence(const PdfTextEntry& prevEntry, const PdfTextEntry& currEntry) const {
-    double maxSpaceLength = (prevEntry.Length / prevEntry.Text.size()) * 13;
+    double maxSpaceLength = (prevEntry.Length / prevEntry.Text.size()) * 9;
     double spaceLength = currEntry.X - prevEntry.X - prevEntry.Length;
     return spaceLength < maxSpaceLength;
 }
